@@ -1,0 +1,75 @@
+{
+  "standorte": {
+    "Zürich": {
+      "anzahl_beschaeftigte": 536980,
+      "anzahl_einwohner": 427721,
+      "anzahl_einpendelnde": 338458.9,
+      "motorisierungsgrad": 328,
+      "modal_split_auto": 18.8
+    },
+    "Basel": {
+      "anzahl_beschaeftigte": 194128,
+      "anzahl_einwohner": 173552,
+      "anzahl_einpendelnde": 106805.8,
+      "motorisierungsgrad": 315.3,
+      "modal_split_auto": 19
+    }
+  },
+  
+  "firmen": [
+    {
+      "name": "UBS",
+      "adresse": "Bahnhofstrasse 45, Zürich",
+      "lat": 47.37206508238767,
+      "lon": 8.538280693066223,
+      "mitarbeiterzahl": 23400,
+      "branche": "Finanzen, Versicherungen, Beratung",
+      "standort": "Zürich"
+    },
+    {
+      "name": "Holcim",
+      "adresse": "Hagenholzstrasse 83, Zürich",
+      "lat": 47.41496899202684,
+      "lon": 8.559693097338753,
+      "mitarbeiterzahl": 1200,
+      "branche": "Industrie, Produktion & Handel",
+      "standort": "Zürich"
+    },
+    {
+      "name": "Accenture",
+      "adresse": "Sihlstrasse 34, Zürich",
+      "lat": 47.373246621135145,
+      "lon": 8.536205970350489,
+      "mitarbeiterzahl": 1000,
+      "branche": "IT & Software",
+      "standort": "Zürich"
+    },
+    {
+      "name": "Adobe",
+      "adresse": "Peter Merian-Strasse 80, Basel",
+      "lat": 47.54648080247478,
+      "lon": 7.5940601267604295,
+      "mitarbeiterzahl": 150,
+      "branche": "IT & Software",
+      "standort": "Basel"
+    },
+    {
+      "name": "Roche",
+      "adresse": "Grenzacherstrasse 124, Basel",
+      "lat": 47.55882849723229,
+      "lon": 7.607634603797223,
+      "mitarbeiterzahl": 11500,
+      "branche": "Verwaltung, Bildung, Gesundheitswesen, Dienstleisungen",
+      "standort": "Basel"
+    },
+    {
+      "name": "Bell Food Group",
+      "adresse": "Elsässerstrasse 174, Basel",
+      "lat": 47.57426596576063,
+      "lon": 7.575036351318255,
+      "mitarbeiterzahl": 672,
+      "branche": "Industrie, Produktion & Handel",
+      "standort": "Basel"
+    }
+  ]
+}
