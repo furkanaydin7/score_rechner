@@ -531,7 +531,7 @@ class StandortScoreRechner:
 
                 # DataFrame erstellen und in Excel schreiben
                 df = pd.DataFrame(data, columns=['A', 'B', 'C', 'D'])
-                sheet_name = ergebnis['firma'][:31]  # Excel sheet names max 31 chars
+                sheet_name = ergebnis['firma'][:31]
                 df.to_excel(writer, sheet_name=sheet_name, index=False, header=False)
 
     def print_ergebnis(self, ergebnis: Dict):
