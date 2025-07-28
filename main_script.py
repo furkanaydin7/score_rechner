@@ -120,7 +120,7 @@ def main():
         output_file_path = OUTPUT_DIR / output_file
 
         print(f"\n💾 Exportiere Ergebnisse nach {output_file_path}...")
-        rechner.export_to_excel(alle_ergebnisse, output_file_path)
+        rechner.export_to_excel(alle_ergebnisse, str(output_file_path))
         print(f"✅ Export erfolgreich!")
 
         # Zusammenfassung
