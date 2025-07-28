@@ -12,7 +12,7 @@ Verwendung:
 2. Stellen Sie sicher, dass die CSV-Dateien vorhanden sind:
    - oev_qualitaet_gemeinden.csv
    - Betriebspunkt.csv
-3. Führen Sie das Skript aus: python main.py
+3. Führen Sie das Skript aus: python main_script.py
 """
 
 import json
@@ -23,7 +23,13 @@ from datetime import datetime
 # Import der Haupt-Rechner-Klasse
 from standort_score_rechner import StandortScoreRechner, Standort, Firma
 
-def load_config(config_file: str = "config.json"):
+PROJECT_ROOT = Path(__file__).resolve().parent
+CONFIG_PATH = PROJECT_ROOT / "config.json"
+OEV_GUETE_PATH = PROJECT_ROOT / "data" / "oev_qualitaet_gemeinden.csv"
+BETRIEBSPUNKT_PATH = PROJECT_ROOT / "data" / "Betriebspunkt.csv"
+OUTPUT_DIR = PROJECT_ROOT / "output"
+
+def load_config(config_file: Path):
     """Lädt die Konfiguration aus JSON-Datei"""
     try:
         with open(config_file, 'r', encoding='utf-8') as f:
@@ -44,11 +50,14 @@ def main():
 
     # Konfiguration laden
     print("📁 Lade Konfiguration...")
-    config = load_config()
+    config = load_config(CONFIG_PATH)
 
     # Rechner initialisieren
     print("🔧 Initialisiere Rechner...")
-    rechner = StandortScoreRechner()
+    rechner = StandortScoreRechner(
+        oev_qualitaet_path=OEV_GUETE_PATH,
+        betriebspunkt_path=BETRIEBSPUNKT_PATH
+    )
 
     # Alle Ergebnisse sammeln
     alle_ergebnisse = []
@@ -104,9 +113,14 @@ def main():
 
     # Ergebnisse exportieren
     if alle_ergebnisse:
+        # Erstellt den output-Ordner, falls er nicht existiert
+        OUTPUT_DIR.mkdir(exist_ok=True)
+
         output_file = f"standort_scores_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-        print(f"\n💾 Exportiere Ergebnisse nach {output_file}...")
-        rechner.export_to_excel(alle_ergebnisse, output_file)
+        output_file_path = OUTPUT_DIR / output_file
+
+        print(f"\n💾 Exportiere Ergebnisse nach {output_file_path}...")
+        rechner.export_to_excel(alle_ergebnisse, output_file_path)
         print(f"✅ Export erfolgreich!")
 
         # Zusammenfassung

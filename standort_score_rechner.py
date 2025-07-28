@@ -142,17 +142,19 @@ KATEGORIEN = {
 class TransportAnalyzer:
     """Integriert alle Transportanalyse-Funktionen"""
 
-    def __init__(self):
+    def __init__(self, oev_qualitaet_path: Path, betriebspunkt_path: Path):
         self.lv95_to_wgs84 = Transformer.from_crs(2056, 4326, always_xy=True)
         self.overpass_url = "http://overpass.osm.ch/api/interpreter"
+        self.oev_qualitaet_path = oev_qualitaet_path
+        self.betriebspunkt_path = betriebspunkt_path
 
-    def get_oev_gueteklasse(self, gemeinde_name: str, csv_path: str = "oev_qualitaet_gemeinden.csv") -> Tuple[str, float]:
+    def get_oev_gueteklasse(self, gemeinde_name: str) -> Tuple[str, float]:
         """
         Holt ÖV-Güteklasse aus CSV
         Returns: (Güteklasse, mean_score)
         """
         try:
-            df = pd.read_csv(csv_path, dtype={"bfs_nummer": str})
+            df = pd.read_csv(self.oev_qualitaet_path, dtype={"bfs_nummer": str})
             treffer = df[df["gemeinde"].str.contains(gemeinde_name, case=False, regex=False)]
 
             if treffer.empty:
@@ -174,13 +176,13 @@ class TransportAnalyzer:
             print(f"Fehler beim Lesen der ÖV-Güteklasse: {e}")
             return "C", 3.0  # Standardwert
 
-    def get_naechste_haltestelle(self, lat: float, lon: float, csv_path: str = "Betriebspunkt.csv") -> Tuple[str, float]:
+    def get_naechste_haltestelle(self, lat: float, lon: float) -> Tuple[str, float]:
         """
         Findet nächste ÖV-Haltestelle
         Returns: (Name, Distanz in Metern)
         """
         try:
-            df = pd.read_csv(csv_path, usecols=["Name", "E", "N"])
+            df = pd.read_csv(self.betriebspunkt_path, usecols=["Name", "E", "N"])
 
             # LV95 zu WGS84 konvertieren
             lats, lons = [], []
@@ -297,8 +299,11 @@ class TransportAnalyzer:
 class StandortScoreRechner:
     """Berechnet alle Scores für Standort und Firma"""
 
-    def __init__(self):
-        self.analyzer = TransportAnalyzer()
+    def __init__(self, oev_qualitaet_path: Path, betriebspunkt_path: Path):
+        self.analyzer = TransportAnalyzer(
+            oev_qualitaet_path=oev_qualitaet_path,
+            betriebspunkt_path=betriebspunkt_path
+        )
 
     def kategorie_zuweisen(self, wert: float, typ: str) -> str:
         """Weist basierend auf dem Wert die passende Kategorie zu"""
