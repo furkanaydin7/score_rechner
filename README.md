@@ -65,13 +65,21 @@ openpyxl>=3.0.0
 pip install -r requirements.txt
 ```
 
-## 📁 Benötigte Dateien
+## 📁 Benötigte Dateien und Projektstruktur
 
-1. **standort_score_rechner.py** - Hauptmodul mit allen Berechnungen
-2. **main.py** - Einfaches Ausführungsskript
-3. **config.json** - Konfiguration mit Firmen und Standorten
-4. **oev_qualitaet_gemeinden_neu.csv** - ÖV-Güteklassen der Gemeinden
-5. **Betriebspunkt.csv** - ÖV-Haltestellen-Daten
+```
+standort-score-rechner/
+├── .venv/                          # Virtuelle Umgebung (nach Installation)
+├── data/                           # Datenverzeichnis
+│   ├── oev_qualitaet_gemeinden.csv    # ÖV-Güteklassen der Gemeinden
+│   └── Betriebspunkt.csv              # ÖV-Haltestellen-Daten
+├── output/                         # Ausgabeverzeichnis (wird automatisch erstellt)
+├── standort_score_rechner.py       # Hauptmodul mit allen Berechnungen
+├── main_script.py                  # Ausführungsskript
+├── config.json                     # Konfiguration mit Firmen und Standorten
+├── requirements.txt                # Python-Abhängigkeiten
+└── README.md                       # Diese Datei
+```
 
 ## 🔧 Konfiguration
 
@@ -125,29 +133,37 @@ Die `config.json` enthält zwei Hauptbereiche:
 ### Einfache Ausführung
 
 ```bash
-python main.py
+python main_script.py
 ```
 
 Dies wird:
 1. Alle Firmen aus der config.json verarbeiten
 2. Alle Scores berechnen
-3. Eine Excel-Datei mit Zeitstempel erstellen
+3. Eine Excel-Datei mit Zeitstempel im `output/` Ordner erstellen
 4. Eine Zusammenfassung anzeigen
 
 ### Programmatische Verwendung
 
 ```python
+from pathlib import Path
 from standort_score_rechner import StandortScoreRechner, Standort, Firma
 
-# Rechner initialisieren
-rechner = StandortScoreRechner()
+# Pfade definieren
+oev_path = Path("data/oev_qualitaet_gemeinden.csv")
+betriebspunkt_path = Path("data/Betriebspunkt.csv")
 
-# Standort definieren
+# Rechner initialisieren
+rechner = StandortScoreRechner(
+    oev_qualitaet_path=oev_path,
+    betriebspunkt_path=betriebspunkt_path
+)
+
+# Standort definieren (mit Rohdaten)
 standort = Standort(
     name="Zürich",
-    oev_gueteklasse="A",
-    beschaeftigte_pro_1000=1255,
-    einpendler_prozent=63.03,
+    anzahl_beschaeftigte=536980,
+    anzahl_einwohner=427721,
+    anzahl_einpendelnde=338458.9,
     motorisierungsgrad=328,
     modal_split_auto=18.8
 )
@@ -176,6 +192,7 @@ rechner.export_to_excel([ergebnis], "beispiel_scores.xlsx")
 
 ### Konsolen-Ausgabe
 - Fortschrittsanzeige während der Berechnung
+- Automatische Berechnungen werden angezeigt
 - Zusammenfassung mit Top-Firmen
 - Hinweise auf Firmen mit Verbesserungspotential
 
@@ -184,22 +201,23 @@ rechner.export_to_excel([ergebnis], "beispiel_scores.xlsx")
 - Formatierte Darstellung aller Parameter
 - Automatische Kategorie-Zuweisung
 - Berechnete Durchschnitts- und Gesamt-Scores
+- Gespeichert im `output/` Ordner mit Zeitstempel
 
 ## 🔍 Bewertungskriterien
 
 ### Standort-Parameter (je 1-5 Punkte)
 1. **ÖV-Anbindungsqualität**: A=5, B=4, C=3, D=2, E=1
-2. **Beschäftigte pro 1000 Einwohner**: <300=5 bis >900=1
-3. **Einpendler prozentual**: <40%=5 bis >70%=1
-4. **Motorisierungsgrad**: <500=5 bis >800=1
-5. **Modal-Split (Autopendler)**: <40%=5 bis >70%=1
+2. **Beschäftigte pro 1000 Einwohner**: <300=5, 300-500=4, 501-700=3, 701-900=2, >900=1
+3. **Einpendler prozentual**: <40%=5, 40-50%=4, 51-60%=5, 61-70%=2, >70%=1
+4. **Motorisierungsgrad**: <500=5, 500-600=4, 601-700=3, 701-800=2, >800=1
+5. **Modal-Split (Autopendler)**: <40%=5, 40-50%=4, 51-60%=3, 61-70%=2, >70%=1
 
 ### Firmen-Parameter (je 1-5 Punkte)
-1. **Mitarbeiterzahl**: <50=5 bis >500=1
-2. **ÖV-Anbindung**: <300m=5 bis >1000m=1
-3. **Branche**: IT=5 bis Logistik=1
-4. **Autobahnauffahrt**: >5000m=5 bis <1000m=1
-5. **Parkplatz**: >500m=5 bis <100m=1
+1. **Mitarbeiterzahl**: <50=5, 50-100=4, 101-250=3, 251-500=2, >500=1
+2. **ÖV-Anbindung**: <300m=5, 300-500m=4, 501-750m=3, 751-1000m=2, >1000m=1
+3. **Branche**: IT=5, Finanzen=4, Verwaltung=3, Industrie=2, Logistik=1
+4. **Autobahnauffahrt**: >5000m=5, 3001-5000m=4, 2001-3000m=3, 1000-2000m=2, <1000m=1
+5. **Parkplatz**: >500m=5, 301-500m=4, 201-300m=3, 100-200m=2, <100m=1
 
 ### Score-Berechnung
 - **Standort-Score** = Durchschnitt der Standort-Parameter
@@ -214,13 +232,15 @@ rechner.export_to_excel([ergebnis], "beispiel_scores.xlsx")
 - Alternative: Manuelle Werte in config.json eintragen
 
 ### Fehlende CSV-Dateien
-- Stellen Sie sicher, dass `oev_qualitaet_gemeinden.csv` und `Betriebspunkt.csv` im gleichen Verzeichnis liegen
-- Prüfen Sie die Spaltennamen in den CSV-Dateien
+- Stellen Sie sicher, dass `oev_qualitaet_gemeinden.csv` und `Betriebspunkt.csv` im `data/` Verzeichnis liegen
+- Prüfen Sie die Spaltennamen in den CSV-Dateien:
+  - `oev_qualitaet_gemeinden.csv`: Spalten `bfs_nummer`, `gemeinde`, `mean_score`
+  - `Betriebspunkt.csv`: Spalten `Name`, `E`, `N`
 
 ### Installation von geopandas
 Falls Probleme bei der Installation von geopandas auftreten:
 ```bash
-# Windows
+# Windows (mit Anaconda)
 conda install -c conda-forge geopandas
 
 # Linux/Mac
@@ -228,11 +248,13 @@ sudo apt-get install gdal-bin libgdal-dev  # Ubuntu/Debian
 pip install geopandas
 ```
 
-## 📝 Lizenz
+### Fehlende Module
+Das Skript prüft automatisch beim Start, ob alle benötigten Module installiert sind und gibt eine entsprechende Fehlermeldung aus.
 
-Dieses Tool nutzt öffentliche Daten von OpenStreetMap und anderen Quellen. 
-Bitte beachten Sie die jeweiligen Lizenzbedingungen der Datenquellen.
+## 📝 Hinweise zur Verwendung
 
-## 🤝 Beitragen
-
-Verbesserungsvorschläge und Erweiterungen sind willkommen!
+- Die CSV-Dateien müssen im `data/` Verzeichnis liegen
+- Die Ausgabe-Excel-Dateien werden im `output/` Verzeichnis gespeichert
+- Bei der ersten Ausführung werden die Verzeichnisse automatisch erstellt
+- Die ÖV-Güteklasse wird automatisch aus der CSV ermittelt
+- Alle Berechnungen werden in der Konsole protokolliert
